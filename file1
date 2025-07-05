@@ -1,0 +1,74 @@
+class Product:
+    def __init__(self, name, price, quantity, expires=False, shippable=False, weight=0):
+        self.name = name
+        self.price = price
+        self.quantity = quantity
+        self.expires = expires
+        self.shippable = shippable
+        self.weight = weight  # used only if shippable
+
+class CartItem:
+    def __init__(self, product, quantity):
+        self.product = product
+        self.quantity = quantity
+
+class Customer:
+    def __init__(self, name, balance):
+        self.name = name
+        self.balance = balance
+        self.cart = []
+
+    def add_to_cart(self, product, quantity):
+        if quantity > product.quantity:
+            print(f"Not enough stock for {product.name}. Available: {product.quantity}")
+            return
+        self.cart.append(CartItem(product, quantity))
+        print(f"Added {quantity} x {product.name} to cart.")
+
+    def checkout(self):
+        if not self.cart:
+            print("Cart is empty. Please add products before checkout.")
+            return
+
+        subtotal = 0
+        shipping_fees = 0
+
+        for item in self.cart:
+            subtotal += item.product.price * item.quantity
+            if item.product.shippable:
+                shipping_fees += item.product.weight * 2  # example flat shipping rate per kg
+
+        total = subtotal + shipping_fees
+
+        if self.balance < total:
+            print("Insufficient balance. Please check your wallet.")
+            return
+
+        for item in self.cart:
+            item.product.quantity -= item.quantity
+
+        self.balance -= total
+
+        print("\nCheckout Summary:")
+        print(f"Subtotal: {subtotal:.2f} EGP")
+        print(f"Shipping Fees: {shipping_fees:.2f} EGP")
+        print(f"Total Paid: {total:.2f} EGP")
+        print(f"Remaining Balance: {self.balance:.2f} EGP")
+
+        self.cart = []
+
+# Sample Products
+cheese = Product("Cheese", 50, 10, expires=True, shippable=True, weight=1)
+tv = Product("TV", 5000, 5, expires=False, shippable=True, weight=10)
+mobile = Product("Mobile", 3000, 7, expires=False, shippable=False)
+scratch_card = Product("Scratch Card", 50, 100, expires=False, shippable=False)
+biscuits = Product("Biscuits", 20, 50, expires=True, shippable=True, weight=0.5)
+
+# Create a customer
+nermeen = Customer("Nermeen", balance=6000)
+
+# Example usage
+nermeen.add_to_cart(cheese, 2)
+nermeen.add_to_cart(tv, 1)
+nermeen.add_to_cart(mobile, 1)
+nermeen.checkout()
